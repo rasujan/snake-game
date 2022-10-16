@@ -1,13 +1,16 @@
 use piston_window::types::Color;
 use piston_window::*;
+use rand::{thread_rng, Rng};
 
 use crate::draw::{draw_block, draw_rectangle};
-use rand::{thread_rng, Rng};
+use crate::snake::{Direction, Snake};
 
 const BORDER_COLOR: Color = [0.252, 0.202, 0.70, 1.0];
 const FOOD_COLOR: Color = [0.0, 0.6, 0.0, 1.0];
 
 pub struct Game {
+    snake: Snake,
+
     //Food
     food_exists: bool,
     food_x: i32,
@@ -20,6 +23,7 @@ pub struct Game {
 impl Game {
     pub fn new(width: i32, height: i32) -> Game {
         Game {
+            snake: Snake::new(2, 2),
             //food
             food_exists: false,
             food_x: 0,
@@ -27,6 +31,21 @@ impl Game {
             //Border
             width,
             height,
+        }
+    }
+
+    pub fn key_pressed(&mut self, key: Key) {
+        let direction = match key {
+            key::Up => Some(Direction::Up),
+            key::Down => Some(Direction::Down),
+            key::Right => Some(Direction::Right),
+            key::Left => Some(Direction::Left),
+            _ => Some(self.snake.head_direction()),
+        };
+
+        // * can't go in opposite direction
+        if direction.unwrap() == self.snake.head_direction().opposite() {
+            return;
         }
     }
 
