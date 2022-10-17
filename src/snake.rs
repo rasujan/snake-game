@@ -2,12 +2,11 @@ use crate::draw::draw_block;
 use piston_window::types::Color;
 use piston_window::{Context, G2d};
 
-use std::collection::LinkedList;
 use std::collections::LinkedList;
 
-const SNAKE_COLOR: Color = [0.08, 0.0, 0.0, 0.9];
+const SNAKE_COLOR: Color = [0.8, 0.0, 0.0, 1.0];
 
-#[Derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum Direction {
     Up,
     Down,
@@ -26,7 +25,7 @@ impl Direction {
     }
 }
 
-#[Derive(Debug, Clone)]
+#[derive(Debug, Clone)]
 struct Block {
     x: i32,
     y: i32,
@@ -39,7 +38,7 @@ pub struct Snake {
 }
 
 impl Snake {
-    pub fn snake(x: i32, y: i32) -> Snake {
+    pub fn new(x: i32, y: i32) -> Snake {
         let mut body: LinkedList<Block> = LinkedList::new();
 
         body.push_back(Block { x: x + 2, y });
@@ -49,7 +48,7 @@ impl Snake {
         Snake {
             direction: Direction::Right,
             body,
-            tail: none,
+            tail: None,
         }
     }
 
@@ -66,7 +65,7 @@ impl Snake {
 
     pub fn move_forward(&mut self, dir: Option<Direction>) {
         match dir {
-            Some(dir) => self.direction = d,
+            Some(dir) => self.direction = dir,
             None => {}
         }
         let (last_x, last_y): (i32, i32) = self.head_position();
@@ -82,7 +81,7 @@ impl Snake {
             },
             Direction::Right => Block {
                 x: last_x + 1,
-                y: last_y1,
+                y: last_y,
             },
             Direction::Left => Block {
                 x: last_x - 1,
@@ -91,7 +90,7 @@ impl Snake {
         };
 
         self.body.push_front(new_block);
-        let removed_block: block = self.body.pop_back().unwrap();
+        let removed_block = self.body.pop_back().unwrap();
         self.tail = Some(removed_block);
     }
 
