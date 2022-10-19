@@ -5,10 +5,12 @@ use rand::{thread_rng, Rng};
 use crate::draw::{draw_block, draw_rectangle};
 use crate::snake::{Direction, Snake};
 
-const BORDER_COLOR: Color = [0.252, 0.202, 0.70, 1.0];
-const FOOD_COLOR: Color = [0.0, 0.6, 0.0, 1.0];
+const BORDER_COLOR: Color = [0.4, 0.31, 0.37, 0.1]; // Very Dark Green
+const FOOD_COLOR: Color = [0.0, 0.6, 0.0, 1.0]; // Light Green
+const GAME_OVER_COLOR: Color = [0.9, 0.0, 0.0, 0.5]; // Transparent Red;
 
 const MOVING_PERIOD: f64 = 0.2;
+const RESTART_TIME: f64 = 1.0;
 
 pub struct Game {
     // Snake
@@ -22,25 +24,31 @@ pub struct Game {
     height: i32,
     // Misc
     waiting_time: f64,
+    game_over: bool,
 }
 
 impl Game {
     pub fn new(width: i32, height: i32) -> Game {
         Game {
             snake: Snake::new(2, 2),
-            //food
+            // Food
             food_exists: false,
             food_x: 0,
             food_y: 0,
-            //Border
+            // Border
             width,
             height,
-            //misc
+            // Misc
             waiting_time: 0.0,
+            game_over: false,
         }
     }
 
     pub fn key_pressed(&mut self, key: Key) {
+        if self.game_over {
+            return;
+        }
+
         let direction = match key {
             Key::Up => Some(Direction::Up),
             Key::Down => Some(Direction::Down),
@@ -73,6 +81,11 @@ impl Game {
         draw_rectangle(BORDER_COLOR, 0, 0, 1, self.height, con, g);
         // Right
         draw_rectangle(BORDER_COLOR, self.width - 1, 0, 1, self.height, con, g);
+
+        // Game Over
+        if self.game_over {
+            draw_rectangle(GAME_OVER_COLOR, 0, 0, self.width, self.height, con, g);
+        }
     }
 
     fn check_eating(&mut self) {
@@ -95,6 +108,13 @@ impl Game {
 
     pub fn update(&mut self, delta_time: f64) {
         self.waiting_time += delta_time;
+
+        if self.game_over {
+            if self.waiting_time > RESTART_TIME {
+                self.restart()
+            }
+            return;
+        }
 
         if !self.food_exists {
             self.add_food()
