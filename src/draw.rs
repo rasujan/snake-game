@@ -1,5 +1,5 @@
 use piston_window::types::Color;
-use piston_window::{rectangle, Context, G2d};
+use piston_window::{ellipse, rectangle, Context, G2d};
 
 const BLOCK_SIZE: f64 = 20.0;
 
@@ -16,6 +16,18 @@ pub fn draw_block(color: Color, x: i32, y: i32, con: &Context, g: &mut G2d) {
     let gui_y = to_coord(y);
 
     rectangle(
+        color,
+        [gui_x, gui_y, BLOCK_SIZE, BLOCK_SIZE],
+        con.transform,
+        g,
+    );
+}
+
+pub fn draw_circle(color: Color, x: i32, y: i32, con: &Context, g: &mut G2d) {
+    let gui_x = to_coord(x);
+    let gui_y = to_coord(y);
+
+    ellipse(
         color,
         [gui_x, gui_y, BLOCK_SIZE, BLOCK_SIZE],
         con.transform,
@@ -45,5 +57,5 @@ pub fn draw_rectangle(
         ],
         con.transform,
         g,
-    );
+    )
 }

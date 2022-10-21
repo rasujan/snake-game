@@ -123,14 +123,14 @@ impl Snake {
     pub fn overlap_tail(&self, x: i32, y: i32) -> bool {
         let mut count = 0;
 
-        for block in self.body {
+        for block in &self.body {
             if x == block.x && y == block.y {
                 return true;
             }
 
             count += 1;
 
-            if count = self.body.len() - 1 {
+            if count == &self.body.len() - 1 {
                 break;
             }
         }

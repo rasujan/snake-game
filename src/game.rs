@@ -2,7 +2,7 @@ use piston_window::types::Color;
 use piston_window::*;
 use rand::{thread_rng, Rng};
 
-use crate::draw::{draw_block, draw_rectangle};
+use crate::draw::{draw_circle, draw_rectangle};
 use crate::snake::{Direction, Snake};
 
 const BORDER_COLOR: Color = [0.4, 0.31, 0.37, 0.1]; // Very Dark Green
@@ -70,7 +70,7 @@ impl Game {
         self.snake.draw(con, g);
         // Draw food
         if self.food_exists {
-            draw_block(FOOD_COLOR, self.food_x, self.food_y, con, g);
+            draw_circle(FOOD_COLOR, self.food_x, self.food_y, con, g);
         }
         // This draws the border
         // Top
@@ -98,8 +98,13 @@ impl Game {
 
     fn add_food(&mut self) {
         let mut rag = thread_rng();
-        let new_x = rag.gen_range(1..self.width - 1);
-        let new_y = rag.gen_range(1..self.height - 1);
+        let mut new_x = rag.gen_range(1..self.width - 1);
+        let mut new_y = rag.gen_range(1..self.height - 1);
+
+        while self.snake.overlap_tail(new_x, new_y) {
+            new_x = rag.gen_range(1..self.width - 1);
+            new_y = rag.gen_range(1..self.height - 1);
+        }
 
         self.food_x = new_x;
         self.food_y = new_y;
@@ -125,9 +130,33 @@ impl Game {
         }
     }
 
+    fn check_if_snake_is_alive(&self, direction: Option<Direction>) -> bool {
+        let (next_x, next_y) = self.snake.next_head(direction);
+
+        if self.snake.overlap_tail(next_x, next_y) {
+            return false;
+        }
+
+        // Checking if the snake is inside the box
+        next_x > 0 && next_y > 0 && next_x < self.width - 1 && next_y < self.height - 1
+    }
+
     fn update_snake(&mut self, direction: Option<Direction>) {
-        self.snake.move_forward(direction);
-        self.check_eating();
+        if self.check_if_snake_is_alive(direction) {
+            self.snake.move_forward(direction);
+            self.check_eating();
+        } else {
+            self.game_over = true;
+        }
         self.waiting_time = 0.0;
+    }
+
+    fn restart(&mut self) {
+        self.snake = Snake::new(2, 2);
+        self.waiting_time = 0.0;
+        self.food_exists = false;
+        self.food_x = 0;
+        self.food_y = 0;
+        self.game_over = false;
     }
 }
